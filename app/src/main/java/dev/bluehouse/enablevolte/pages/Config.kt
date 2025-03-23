@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
 import dev.bluehouse.enablevolte.CarrierModer
+import dev.bluehouse.enablevolte.Moder
 import dev.bluehouse.enablevolte.R
 import dev.bluehouse.enablevolte.ShizukuStatus
 import dev.bluehouse.enablevolte.SubscriptionModer
@@ -56,6 +57,8 @@ fun Config(
     val cannotFindKeyText = stringResource(R.string.cannot_find_key)
     var configurable by rememberSaveable { mutableStateOf(false) }
     var voLTEEnabled by rememberSaveable { mutableStateOf(false) }
+    var nrNSAEnabled by rememberSaveable { mutableStateOf(false) }
+    var nrSAEnabled by rememberSaveable { mutableStateOf(false) }
     var voNREnabled by rememberSaveable { mutableStateOf(false) }
     var crossSIMEnabled by rememberSaveable { mutableStateOf(false) }
     var voWiFiEnabled by rememberSaveable { mutableStateOf(false) }
@@ -93,6 +96,8 @@ fun Config(
                 .associate { field -> field.name to field.get(field) as String }
         reversedConfigurableItems = configurableItems.entries.associate { (k, v) -> v to k }
         voLTEEnabled = moder.isVoLteConfigEnabled
+        nrNSAEnabled = VERSION.SDK_INT >= VERSION_CODES.S && moder.isNrNsaConfigEnabled
+        nrSAEnabled = VERSION.SDK_INT >= VERSION_CODES.S && moder.isNrSaConfigEnabled
         voNREnabled = VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE && moder.isVoNrConfigEnabled
         crossSIMEnabled = moder.isCrossSIMConfigEnabled
         voWiFiEnabled = moder.isVoWifiConfigEnabled
@@ -158,6 +163,48 @@ fun Config(
                         moder.restartIMSRegistration()
                         true
                     }
+            }
+
+            BooleanPropertyView(
+                label = stringResource(R.string.enable_nr_nsa),
+                toggled = nrNSAEnabled,
+            ) {
+                if (VERSION.SDK_INT < VERSION_CODES.S) return@BooleanPropertyView
+                nrNSAEnabled = if (nrNSAEnabled) {
+                    moder.updateCarrierConfig(
+                        CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
+                        Moder.removeFromIntArray(moder.nrAvailability, CarrierConfigManager.CARRIER_NR_AVAILABILITY_NSA)
+                    )
+                    false
+                } else {
+                    moder.updateCarrierConfig(
+                        CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
+                        Moder.addToIntArray(moder.nrAvailability, CarrierConfigManager.CARRIER_NR_AVAILABILITY_NSA)
+                    )
+                    moder.restartIMSRegistration()
+                    true
+                }
+            }
+
+            BooleanPropertyView(
+                label = stringResource(R.string.enable_nr_sa),
+                toggled = nrSAEnabled,
+            ) {
+                if (VERSION.SDK_INT < VERSION_CODES.S) return@BooleanPropertyView
+                nrSAEnabled = if (nrSAEnabled) {
+                    moder.updateCarrierConfig(
+                        CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
+                        Moder.removeFromIntArray(moder.nrAvailability, CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA)
+                    )
+                    false
+                } else {
+                    moder.updateCarrierConfig(
+                        CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
+                        Moder.addToIntArray(moder.nrAvailability, CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA)
+                    )
+                    moder.restartIMSRegistration()
+                    true
+                }
             }
 
             BooleanPropertyView(

@@ -85,6 +85,19 @@ open class Moder {
                         .get()!!,
                 ),
             )
+
+    companion object {
+        fun addToIntArray(arr: IntArray, value: Int): IntArray {
+            val index = arr.indexOfFirst { it > value }.let { if (it == -1) arr.size else it }
+            val newArr = IntArray(arr.size + 1)
+            arr.copyInto(newArr, 0, 0, index)
+            newArr[index] = value
+            arr.copyInto(newArr, index + 1, index, arr.size)
+            return newArr
+        }
+
+        fun removeFromIntArray(arr: IntArray, value: Int) = arr.filter { it != value }.toIntArray()
+    }
 }
 
 class CarrierModer(
@@ -369,6 +382,18 @@ class SubscriptionModer(
 
     val isVoLteConfigEnabled: Boolean
         get() = this.getBooleanValue(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL)
+
+    val nrAvailability: IntArray
+        @RequiresApi(VERSION_CODES.S)
+        get() = this.getIntArrayValue(CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY)
+
+    val isNrNsaConfigEnabled: Boolean
+        @RequiresApi(VERSION_CODES.S)
+        get() = nrAvailability.contains(CarrierConfigManager.CARRIER_NR_AVAILABILITY_NSA)
+
+    val isNrSaConfigEnabled: Boolean
+        @RequiresApi(VERSION_CODES.S)
+        get() = nrAvailability.contains(CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA)
 
     val isVoNrConfigEnabled: Boolean
         @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
