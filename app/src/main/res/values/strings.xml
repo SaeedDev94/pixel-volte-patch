@@ -12,6 +12,8 @@
     <string name="shizuku_service_running">Shizuku Service Running</string>
     <string name="shizuku_permission_granted">Shizuku Permission Granted</string>
     <string name="enable_volte">Enable VoLTE</string>
+    <string name="enable_nr_nsa">Enable NR NSA</string>
+    <string name="enable_nr_sa">Enable NR SA</string>
     <string name="enable_vonr">Enable VoNR</string>
     <string name="enable_crosssim">Enable Backup Calling</string>
     <string name="enable_vowifi">Enable VoWiFi</string>
